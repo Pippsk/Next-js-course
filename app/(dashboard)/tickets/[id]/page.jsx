@@ -1,8 +1,20 @@
-import Loading from "@/app/loading";
+import Loading from "@/app/(dashboard)/loading";
 import { notFound } from "next/navigation";
 import React, { Suspense } from "react";
 
 export const dynamicParams = true;
+
+export const generateMetadata = async ({ params }) => {
+  const id = params.id;
+
+  const res = await fetch(`http://localhost:4000/tickets/${id}`);
+
+  const ticket = await res.json();
+
+  return {
+    title: `Pippo's helpdesk | ${ticket.title}`,
+  };
+};
 
 export const generateStaticParams = async () => {
   const res = await fetch("http://localhost:4000/tickets");
