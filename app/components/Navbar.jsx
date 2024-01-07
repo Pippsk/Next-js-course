@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import Logo from "./logo.png";
+import { Span } from "next/dist/trace";
+import LogoutButton from "./LogoutButton";
 
-const Navbar = () => {
+const Navbar = ({ user }) => {
   return (
     <nav>
       <Image
@@ -15,7 +17,11 @@ const Navbar = () => {
       />
       <h2>Pippo's Helpdesk</h2>
       <Link href="/">Dashboard</Link>
-      <Link href="/tickets">Tickets</Link>
+      <Link href="/tickets" className="mr-auto">
+        Tickets
+      </Link>
+      {user && <span>Hello, {user.email}</span>}
+      <LogoutButton />
     </nav>
   );
 };
