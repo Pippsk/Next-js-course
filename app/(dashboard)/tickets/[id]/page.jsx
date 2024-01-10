@@ -1,63 +1,65 @@
-import Loading from "@/app/(dashboard)/loading";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { notFound } from "next/navigation";
-import React, { Suspense } from "react";
+import { cookies } from "next/headers";
+import DeleteButton from "./DeleteButton";
 
 export const dynamicParams = true;
 
 export const generateMetadata = async ({ params }) => {
-  const id = params.id;
+  const supabase = createServerComponentClient({ cookies });
 
-  const res = await fetch(`http://localhost:4000/tickets/${id}`);
-
-  const ticket = await res.json();
+  const { data: ticket } = await supabase
+    .from("tickets")
+    .select()
+    .eq("id", params.id)
+    .single();
 
   return {
-    title: `Pippo's helpdesk | ${ticket.title}`,
+    title: `Pippo's helpdesk | ${ticket?.title || "Ticket not found"}`,
   };
 };
 
-export const generateStaticParams = async () => {
-  const res = await fetch("http://localhost:4000/tickets");
-
-  const tickets = await res.json();
-
-  return tickets.map((ticket) => ({
-    id: ticket.id,
-  }));
-};
-
 const getTicket = async (id) => {
-  const response = await fetch(`http://localhost:4000/tickets/${id}`, {
-    next: {
-      revalidate: 60,
-    },
-  });
+  const supabase = createServerComponentClient({ cookies });
 
-  if (!response.ok) {
+  const { data } = await supabase
+    .from("tickets")
+    .select()
+    .eq("id", id)
+    .single();
+
+  if (!data) {
     return notFound();
   }
-  return response.json();
+  return data;
 };
 
 const TicketDetail = async ({ params }) => {
   const ticket = await getTicket(params.id);
 
+  const supabase = createServerComponentClient({ cookies });
+
+  const { data } = await supabase.auth.getSession();
+
   return (
     <main>
       <nav>
         <h2>Ticket details</h2>
+        <div className="ml-auto">
+          {data.session.user.email === ticket.user_email && (
+            <DeleteButton id={ticket.id} />
+          )}
+        </div>
       </nav>
 
-      <Suspense fallback={<Loading />}>
-        <div className="card">
-          <h3>{ticket.title}</h3>
-          <small>Created by {ticket.user_email}</small>
-          <p>{ticket.body}</p>
-          <div className={`pill ${ticket.priority}`}>
-            {ticket.priority} priority
-          </div>
+      <div className="card">
+        <h3>{ticket.title}</h3>
+        <small>Created by {ticket.user_email}</small>
+        <p>{ticket.body}</p>
+        <div className={`pill ${ticket.priority}`}>
+          {ticket.priority} priority
         </div>
-      </Suspense>
+      </div>
     </main>
   );
 };

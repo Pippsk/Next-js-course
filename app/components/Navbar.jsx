@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import Logo from "./logo.png";
-import { Span } from "next/dist/trace";
 import LogoutButton from "./LogoutButton";
 
 const Navbar = ({ user }) => {

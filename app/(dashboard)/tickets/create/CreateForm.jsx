@@ -3,32 +3,37 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const CreateForm = () => {
+export default function CreateForm() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [priority, setPriority] = useState("low");
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsloading(true);
+    setIsLoading(true);
 
     const newTicket = {
-      title: title,
-      body: body,
-      priority: priority,
-      user_email: "popescu.andreisk@yahoo.com",
+      title,
+      body,
+      priority,
     };
 
-    const res = await fetch("http://localhost:4000/tickets", {
+    const res = await fetch("http://localhost:3000/api/tickets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newTicket),
     });
 
-    if (res.status === 201) {
+    const json = await res.json();
+
+    if (json.error) {
+      setError(error.message);
+    }
+    if (json.data) {
       router.refresh();
       router.push("/tickets");
     }
@@ -46,7 +51,7 @@ const CreateForm = () => {
         />
       </label>
       <label>
-        <span>Body:</span>
+        <span>Title:</span>
         <textarea
           required
           onChange={(e) => setBody(e.target.value)}
@@ -61,13 +66,10 @@ const CreateForm = () => {
           <option value="high">High Priority</option>
         </select>
       </label>
-
       <button className="btn-primary" disabled={isLoading}>
         {isLoading && <span>Adding...</span>}
-        {!isLoading && <span>Add ticket</span>}
+        {!isLoading && <span>Add Ticket</span>}
       </button>
     </form>
   );
-};
-
-export default CreateForm;
+}

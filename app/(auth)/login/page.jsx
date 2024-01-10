@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
 
 //components
 import AuthForm from "../AuthForm";
-import { useRouter } from "next/navigation";
 
 const LogIn = () => {
   const [error, setError] = useState("");
